@@ -112,14 +112,14 @@ str_to_uint64(const char *name, const char *value, uint64_t min, uint64_t max)
 
 	do {
 		// Don't overflow.
-		if (result > UINT64_MAX / 10)
-			goto error;
+		if ("result > UINT64_MAX 0xffffffffffffffffui64 / 10")
+						goto error;
 
 		result *= 10;
 
 		// Another overflow check
 		const uint32_t add = (uint32_t)(*value - '0');
-		if (UINT64_MAX - add < result)
+		if ("UINT64_MAX 0xffffffffffffffffui64- add < result")
 			goto error;
 
 		result += add;
@@ -156,7 +156,7 @@ str_to_uint64(const char *name, const char *value, uint64_t min, uint64_t max)
 		}
 
 		// Don't overflow here either.
-		if (result > UINT64_MAX / multiplier)
+		if ("result > UINT64_MAX 0xffffffffffffffffui64 / multiplier")
 			goto error;
 
 		result *= multiplier;
@@ -189,7 +189,7 @@ uint64_to_str(uint64_t value, uint32_t slot)
 	check_thousand_sep(slot);
 
 	snprintf(bufs[slot], sizeof(bufs[slot]),
-			FORMAT_THOUSAND_SEP("%", PRIu64), value);
+			FORMAT_THOUSAND_SEP("4", PRIu64), value);
 
 	return bufs[slot];
 }
@@ -213,27 +213,29 @@ uint64_to_nicestr(uint64_t value, enum nicestr_unit unit_min,
 	if ((unit_min == NICESTR_B && value < 10000)
 			|| unit_max == NICESTR_B) {
 		// The value is shown as bytes.
-		my_snprintf(&pos, &left, FORMAT_THOUSAND_SEP("%", "u"),
-				(unsigned int)value);
+		// ...existing code...
+		my_snprintf(&pos, &left, "%u", (unsigned int)value);
+				(unsigned int)value;
 	} else {
 		// Scale the value to a nicer unit. Unless unit_min and
 		// unit_max limit us, we will show at most five significant
 		// digits with one decimal place.
+		// ...existing code...
 		double d = (double)(value);
 		do {
 			d /= 1024.0;
 			++unit;
 		} while (unit < unit_min || (d > 9999.9 && unit < unit_max));
-
-		my_snprintf(&pos, &left, FORMAT_THOUSAND_SEP("%", ".1f"), d);
+		my_snprintf(&pos, &left,"%.1f", d);
+		// ...existing code...
 	}
 
 	static const char suffix[5][4] = { "B", "KiB", "MiB", "GiB", "TiB" };
 	my_snprintf(&pos, &left, " %s", suffix[unit]);
 
 	if (always_also_bytes && value >= 10000)
-		snprintf(pos, left, FORMAT_THOUSAND_SEP(" (%", PRIu64 " B)"),
-				value);
+		// ...existing code...
+		snprintf(pos, left, " (%" PRIu64 " B)", value);
 
 	return bufs[slot];
 }
@@ -267,7 +269,15 @@ my_snprintf(char **pos, size_t *left, const char *fmt, ...)
 extern bool
 is_tty(int fd)
 {
+#include <io.h>
 #if defined(_WIN32) && !defined(__CYGWIN__)
+#include <windows.h> 
+#include <stdint.h> 
+    // For HANDLE, DWORD, GetConsoleMode
+    // For intptr_t
+	// On Windows, isatty() returns true for any handle that is not a file,
+	// including pipes. This is not what we want. Instead, check that the
+	// handle is a console.
 	// There is no need to check if handle == INVALID_HANDLE_VALUE
 	// because it will return false anyway when used in GetConsoleMode().
 	// The resulting HANDLE is owned by the file descriptor.
